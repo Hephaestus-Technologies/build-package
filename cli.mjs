@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import build from "./build.mjs";
 import bumpVersion from "./bump-version.mjs";
 import {exec} from "child_process";
