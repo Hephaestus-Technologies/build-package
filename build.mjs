@@ -1,7 +1,9 @@
 import cpFile from "cp-file";
 import * as path from "path";
 import ts from "typescript";
+import {readdir} from "./file-system.mjs";
 import * as fs from "./file-system.mjs";
+import filesFromSplat from "./files-from-splat.mjs";
 
 /**
  * @typedef {object} BuildOptions
@@ -19,52 +21,32 @@ export default (root, {inputs, outDir}) => {
 
     const invoke = () => logProgress(async () => {
         await prepBuildDir();
-        const filenames = await generateFilenames();
+        const filenames = await getFilenames();
         transpileTs(filenames.filter(isTs));
+        await copyFiles(filenames);
+    });
+
+    const copyFiles = async (filenames) => {
         const styleSheets = filenames.filter(isStylesheet);
         const jsFiles = filenames.filter(isJs);
         const filesToCopy = [...jsFiles, ...styleSheets];
         await Promise.all(filesToCopy.map(copyToOutput));
-    });
+    };
 
     const prepBuildDir = async () => {
         const dirRoot = path.join(root, outDir);
         if (!fs.exists(dirRoot)) await fs.mkdir(dirRoot);
-        /**@type string[]*/ const items = await fs.readdir(dirRoot);
-        return Promise.all(items.map((item) => {
-            return fs.rm(path.join(dirRoot, item), {
-                force: true,
-                recursive: true
-            });
-        }));
+        const items = await readDir(outDir);
+        return Promise.all(items.map(clearItem));
     };
 
-    const generateFilenames = async () => {
+    const getFilenames = async () => {
         const filenames = inputs.map(generateInputFilenames);
         return [].concat(...await Promise.all(filenames));
     };
 
     const generateInputFilenames = async (item) => {
-        return item.includes("*") ? (await filenamesFromDirectory(item)) : [item];
-    };
-
-    const filenamesFromDirectory = async (dirname) => {
-        const [dirPart] = dirname.split("*");
-        const dirRoot = path.join(root, dirPart);
-        /**@type string[]*/ const items = await fs.readdir(dirRoot);
-        const subItems = await Promise.all(items.map(filenamesFromSubItems(dirname)));
-        return [].concat(...subItems);
-    };
-
-    const filenamesFromSubItems = (dirname) => async (item) => {
-        if (dirname === "node_modules") return [];
-        const [dirPart, extension] = dirname.split("*");
-        const itemPath = path.join(dirPart, item);
-        /**@type Stats */ const stat = await fs.stat(path.join(root, itemPath));
-        if (stat.isDirectory())
-            return filenamesFromDirectory(path.join(itemPath, "*" + extension));
-        if (item.endsWith(extension)) return [path.join(itemPath)];
-        return [];
+        return item.includes("*") ? (await filesFromSplat(root, item)) : [item];
     };
 
     const isTs = (filename) => {
@@ -82,14 +64,13 @@ export default (root, {inputs, outDir}) => {
         return [".js", ".cjs", ".mjs"].includes(extension);
     };
 
-    /**
-     * @param {string[]} filenames
-     */
+    /** @param {string[]} filenames */
     const transpileTs = (filenames) => {
         const options = {
             jsx: "react",
             target: ts.ScriptTarget.ESNext,
             module: ts.ModuleKind.ESNext,
+            moduleResolution: ts.ModuleResolutionKind.NodeJs,
             declaration: true,
             alwaysStrict: true,
             sourceMap: true,
@@ -105,12 +86,25 @@ export default (root, {inputs, outDir}) => {
         return cpFile(filename, destination);
     };
 
+    const readDir = async (dirname) => {
+        const fullPath = path.join(root, dirname);
+        /**@type string[]*/ const items = await readdir(fullPath);
+        return items.map(base => path.join(dirname, base));
+    };
+
+    const clearItem = (itemName) => {
+        return fs.rm(itemName, {
+            force: true,
+            recursive: true
+        });
+    };
+
     const logProgress = async (invokable) => {
         const start = Date.now();
         console.log("\n\x1b[96mBuilding...");
         await invokable();
         const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-        console.log(`\x1b[32mBuild completed in \x1b[92m${elapsed}\x1b[32ms`);
+        console.log(`\x1b[32mBuild completed in \x1b[92m${elapsed}\x1b[32ms\x1b[0m`);
     };
 
     return invoke();

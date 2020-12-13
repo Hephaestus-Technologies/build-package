@@ -20,8 +20,6 @@ jobs:
       - uses: actions/setup-node@master
         with:
           node-version: 14
-          registry-url: https://npm.pkg.github.com/
-          scope: '@hephaestus-technologies'
 
       - name: Bump Version and Push Tag
         id: bump_version
@@ -34,7 +32,7 @@ jobs:
       - name: Publish
         run: |
           npm install
-          node publish.mjs
+          node publish.mjs --public
         env:
           version: ${{ steps.bump_version.outputs.new_tag }}
-          NODE_AUTH_TOKEN: ${{ secrets.MY_PERSONAL_ACCESS_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN }}
