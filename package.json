@@ -5,8 +5,7 @@
     "typescript": "^4.1.2"
   },
   "bin": {
-    "build-package": "build-only.mjs",
-    "publish-package": "publish.mjs"
+    "build-package": "cli.mjs"
   },
   "buildOptions": {
     "inputs": ["*.mjs"]
