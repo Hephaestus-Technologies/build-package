@@ -10,8 +10,8 @@ const root = process.cwd();
  * @property {boolean} private
  */
 
-const readJson = async (filename) => {
-    const fullFilename = path.join(root, filename);
+const readJson = async () => {
+    const fullFilename = path.join(root, "package.json");
     const fileBuffer = await fs.readFile(fullFilename);
     return JSON.parse(fileBuffer.toString());
 };
