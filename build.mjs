@@ -19,12 +19,12 @@ import filesFromSplat from "./files-from-splat.mjs";
  */
 export default (root, {inputs, outDir}) => {
 
-    const invoke = () => logProgress(async () => {
+    const invoke = async () => {
         await prepBuildDir();
         const filenames = await getFilenames();
         transpileTs(filenames.filter(isTs));
         await copyFiles(filenames);
-    });
+    };
 
     const copyFiles = async (filenames) => {
         const styleSheets = filenames.filter(isStylesheet);
@@ -97,14 +97,6 @@ export default (root, {inputs, outDir}) => {
             force: true,
             recursive: true
         });
-    };
-
-    const logProgress = async (invokable) => {
-        const start = Date.now();
-        console.log("\n\x1b[96mBuilding...");
-        await invokable();
-        const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-        console.log(`\x1b[32mBuild completed in \x1b[92m${elapsed}\x1b[32ms\x1b[0m`);
     };
 
     return invoke();
