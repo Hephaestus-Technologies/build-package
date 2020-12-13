@@ -8,6 +8,8 @@
     "build-package": "cli.mjs"
   },
   "buildOptions": {
-    "inputs": ["*.mjs"]
+    "inputs": [
+      "*.mjs"
+    ]
   }
 }

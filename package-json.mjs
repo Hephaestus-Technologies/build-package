@@ -16,12 +16,14 @@ const readJson = async () => {
     return JSON.parse(fileBuffer.toString());
 };
 
-const json = readJson();
+const json = await readJson();
 
-export const isPrivate = json.private != null ? json.private : true;
+const isPrivate = json.private != null ? json.private : true;
 
-export const buildOptions = {
+const buildOptions = {
     outDir: "build",
     inputs: [],
     ...json.buildOptions
 };
+
+export {buildOptions, isPrivate};
