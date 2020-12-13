@@ -7,6 +7,7 @@ const root = process.cwd();
 /**
  * @typedef {object} PackageJson
  * @property {BuildOptions} buildOptions
+ * @property {boolean} private
  */
 
 const readJson = async (filename) => {
@@ -15,10 +16,12 @@ const readJson = async (filename) => {
     return JSON.parse(fileBuffer.toString());
 };
 
-const buildOptions = {
+const json = readJson();
+
+export const isPrivate = json.private != null ? json.private : true;
+
+export const buildOptions = {
     outDir: "build",
     inputs: [],
-    ...(await readJson("./package.json")).buildOptions
+    ...json.buildOptions
 };
-
-export default buildOptions;

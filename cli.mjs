@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {exec} from "child_process";
-import buildOptions from "./build-options.mjs";
+import {isPrivate, buildOptions} from "./package-json.mjs";
 import build from "./build.mjs";
 import bumpVersion from "./bump-version.mjs";
 
@@ -24,8 +24,8 @@ const buildSource = (root) => logProgress(async () => {
 const publish = async (root) => {
     const version = (process.env.version || "v0.1.0").slice(1);
     await bumpVersion(root, version, buildOptions);
-    const publicFlags = process.argv.includes("--public") ? "--access public" : "";
-    await runCommand(`npm publish ./${buildOptions.outDir} ${publicFlags}`);
+    const publicFlags = isPrivate ? "" : " --access public";
+    await runCommand(`npm publish ./${buildOptions.outDir}${publicFlags}`);
 };
 
 const runCommand = (command) => new Promise((resolve) => {
