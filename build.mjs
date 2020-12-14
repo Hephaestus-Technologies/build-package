@@ -11,6 +11,16 @@ import filesFromSplat from "./files-from-splat.mjs";
  * @property {string} outDir
  */
 
+const tsOptions = {
+    jsx: ts.JsxEmit.React,
+    target: ts.ScriptTarget.ESNext,
+    module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.NodeJs,
+    declaration: true,
+    alwaysStrict: true,
+    sourceMap: true
+};
+
 /**
  * @param {String} root
  * @param {BuildOptions} buildOptions
@@ -67,13 +77,7 @@ export default (root, {inputs, outDir}) => {
     /** @param {string[]} filenames */
     const transpileTs = (filenames) => {
         const options = {
-            jsx: "react",
-            target: ts.ScriptTarget.ESNext,
-            module: ts.ModuleKind.ESNext,
-            moduleResolution: ts.ModuleResolutionKind.NodeJs,
-            declaration: true,
-            alwaysStrict: true,
-            sourceMap: true,
+            ...tsOptions,
             outDir
         };
         const host = ts.createCompilerHost(options);
