@@ -10,12 +10,18 @@ import * as path from "path";
  */
 export default async (root, version, {outDir}) => {
 
+    const defaults = {
+        description: "",
+        repository: "",
+        license: "MIT"
+    };
+
     const templatePath = path.join(root, "./package.json");
     const outputPath = path.join(root, path.join("./", outDir, "package.json"));
 
     const raw = await fs.readFile(templatePath);
-    const {buildOptions, scripts, ...json} = JSON.parse(raw.toString());
-    const result = JSON.stringify({version, ...json}, null, 2);
+    const {name, buildOptions, scripts, ...json} = JSON.parse(raw.toString());
+    const result = JSON.stringify({name, version, ...defaults, ...json}, null, 2);
 
     await fs.writeFile(outputPath, result);
 

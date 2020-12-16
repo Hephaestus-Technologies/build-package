@@ -1,6 +1,7 @@
 import cpFile from "cp-file";
 import * as path from "path";
 import ts from "typescript";
+import sass from "sass";
 import {readdir} from "./file-system.mjs";
 import * as fs from "./file-system.mjs";
 import filesFromSplat from "./files-from-splat.mjs";
@@ -33,13 +34,14 @@ export default (root, {inputs, outDir}) => {
         await prepBuildDir();
         const filenames = await getFilenames();
         transpileTs(filenames.filter(isTs));
+        await transpileSass(filenames.filter(isSass));
         await copyFiles(filenames);
     };
 
     const copyFiles = async (filenames) => {
-        const styleSheets = filenames.filter(isStylesheet);
+        const cssFiles = filenames.filter(isCss);
         const jsFiles = filenames.filter(isJs);
-        const filesToCopy = [...jsFiles, ...styleSheets];
+        const filesToCopy = [...jsFiles, ...cssFiles];
         await Promise.all(filesToCopy.map(copyToOutput));
     };
 
@@ -64,9 +66,14 @@ export default (root, {inputs, outDir}) => {
         return [".ts", ".tsx"].includes(extension);
     };
 
-    const isStylesheet = (filename) => {
+    const isSass = (filename) => {
         const extension = path.extname(filename);
-        return [".css", ".scss", ".sass"].includes(extension);
+        return [".sass", ".scss"].includes(extension);
+    };
+
+    const isCss = (filename) => {
+        const extension = path.extname(filename);
+        return [".css"].includes(extension);
     };
 
     const isJs = (filename) => {
@@ -88,6 +95,22 @@ export default (root, {inputs, outDir}) => {
     const copyToOutput = (filename) => {
         const destination = path.join(outDir, filename);
         return cpFile(filename, destination);
+    };
+
+    const transpileSass = (filenames) => {
+        return Promise.all(filenames.map(renderSass));
+    };
+
+    const renderSass = async (filename) => {
+        const {dir, name} = path.parse(filename);
+        const dirname = path.join(outDir, dir);
+        const result = sass.renderSync({
+            file: filename,
+            sourceMap: true
+        });
+        if (!fs.exists(dirname)) await fs.mkdir(dirname)
+        const destination = path.join(dirname, name + ".css");
+        await fs.writeFile(destination, result.css.toString());
     };
 
     const readDir = async (dirname) => {

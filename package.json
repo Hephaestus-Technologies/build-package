@@ -2,7 +2,8 @@
   "name": "@heph-tech/build-package",
   "dependencies": {
     "cp-file": "^9.0.0",
-    "typescript": "^4.1.2"
+    "typescript": "^4.1.2",
+    "sass": "^1.30.0"
   },
   "bin": {
     "build-package": "cli.mjs"
