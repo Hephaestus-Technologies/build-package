@@ -17,4 +17,5 @@ export default (root, version = "v0.1.0") => {
     };
 
     return logProgress("Publishing", invoke);
+
 };

@@ -1,31 +1,33 @@
 import path from "path";
-import {stat, readdir} from "../utils/file-system.mjs";
+import {readdir, stat} from "../utils/file-system.mjs";
 
 export default (root, splat) => {
 
     const invoke = async () => {
-        return filesFromDirectory(outDir());
-    };
-
-    const filesFromSubItems = async (itemName) => {
-        if (shouldSkip(itemName)) return [];
-        const isDirectory = await isDir(itemName);
-        return isDirectory ? filesFromDirectory(itemName) : [itemName];
-    };
-
-    const shouldSkip = (itemName) => {
-        return (
-            itemName === outDir() ||
-            itemName.startsWith(".") ||
-            itemName.endsWith("node_modules") ||
-            !isMatch(itemName)
-        );
+        return filesFromDirectory(inputDir());
     };
 
     const filesFromDirectory = async (dirname) => {
         const items = await readDir(dirname);
         const subItems = await Promise.all(items.map(filesFromSubItems));
         return [].concat(...subItems);
+    };
+
+    const filesFromSubItems = async (itemName) => {
+        return (
+            shouldSkip(itemName) ? [] :
+            await isDir(itemName) ? filesFromDirectory(itemName) :
+            isMatch(itemName) ? [itemName] :
+            []
+        );
+    };
+
+    const shouldSkip = (itemName) => {
+        return (
+            itemName === inputDir() ||
+            itemName.startsWith(".") ||
+            itemName.endsWith("node_modules")
+        );
     };
 
     const isDir = async (item) => {
@@ -45,7 +47,7 @@ export default (root, splat) => {
         return items.map(base => path.join(dirname, base));
     };
 
-    const outDir = () => {
+    const inputDir = () => {
         const [dirPart] = splat.split("*");
         return dirPart;
     };
