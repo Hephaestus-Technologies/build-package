@@ -10,8 +10,8 @@ export default (clientOptions) => `
     <script type="module">
         import * as React from "react";
         import * as ReactDom from "react-dom";
-        import App from "./${clientOptions.app}";
-        ReactDom.render(React.createElement(App), document.querySelector(".app"));
+        import Root from "./${clientOptions.rootComponent}";
+        ReactDom.render(React.createElement(Root), document.querySelector(".app"));
     </script>
 </body>
 </html>

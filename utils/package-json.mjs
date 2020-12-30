@@ -24,7 +24,9 @@ const buildOptions = {
     inputs: [],
     client: {},
     api: {},
+    shared: [],
     ...json.buildOptions
 };
 
+/**@type PackageJson*/
 export {buildOptions, isPrivate};

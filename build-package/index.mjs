@@ -7,12 +7,6 @@ import transpileTs from "./transpile-typescript.mjs";
 import logProgress from "../utils/log-progress.mjs";
 
 /**
- * @typedef {object} BuildOptions
- * @property {string[]} inputs
- * @property {string} outDir
- */
-
-/**
  * @param {String} root
  * @returns {Promise<void>}
  */
@@ -27,7 +21,13 @@ export default (root) => {
     };
 
     const getFilenames = async () => {
-        const filenames = buildOptions.inputs.map(generateInputFilenames);
+        const inputs = [
+            ...buildOptions.inputs,
+            ...(buildOptions.client ? `${buildOptions.client.rootDir}/*` : []),
+            ...(buildOptions.api ? `${buildOptions.api.rootDir}/*` : []),
+            ...buildOptions.shared
+        ];
+        const filenames = inputs.map(generateInputFilenames);
         return [].concat(...await Promise.all(filenames));
     };
 

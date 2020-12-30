@@ -53,7 +53,7 @@ export default async (root) => {
     };
 
     const buildSnowpackConfig = () => {
-        const config = configTemplate(root, buildOptions.client.rootDir);
+        const config = configTemplate(root, buildOptions);
         return fs.writeFile(configFilename(), config);
     };
 
@@ -62,7 +62,7 @@ export default async (root) => {
     };
 
     const configFilename = () => {
-        return path.join(root, "bin", "snowpack.config.js");
+        return path.join(root, "bin", "snowpack.config.json");
     };
 
     const cleanupBin = () => {
