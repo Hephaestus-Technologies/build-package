@@ -23,8 +23,8 @@ export default (root) => {
     const getFilenames = async () => {
         const inputs = [
             ...buildOptions.inputs,
-            ...(buildOptions.client ? `${buildOptions.client.rootDir}/*` : []),
-            ...(buildOptions.api ? `${buildOptions.api.rootDir}/*` : []),
+            ...(buildOptions.client ? [`${buildOptions.client.rootDir}/*`] : []),
+            ...(buildOptions.api ? [`${buildOptions.api.rootDir}/*`] : []),
             ...buildOptions.shared
         ];
         const filenames = inputs.map(generateInputFilenames);
