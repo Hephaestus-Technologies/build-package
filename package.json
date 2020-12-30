@@ -6,10 +6,12 @@
     "sass": "^1.30.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "snowpack": "^2.18.5",
-    "@snowpack/plugin-sass": "^1.2.0",
-    "@snowpack/plugin-react-refresh": "^2.3.9"
+    "snowpack": "^2.18.5"
   },
+  "plugins": [
+    "@snowpack/plugin-sass",
+    "@snowpack/plugin-react-refresh"
+  ],
   "bin": {
     "build-package": "cli.mjs"
   },
