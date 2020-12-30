@@ -1,5 +1,4 @@
 import path from "path";
-import build from "./build.mjs";
 import * as fs from "./file-system.mjs";
 
 const root = process.cwd();
@@ -23,6 +22,8 @@ const isPrivate = json.private != null ? json.private : true;
 const buildOptions = {
     outDir: "build",
     inputs: [],
+    client: {},
+    api: {},
     ...json.buildOptions
 };
 

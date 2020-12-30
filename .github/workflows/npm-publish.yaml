@@ -32,7 +32,7 @@ jobs:
       - name: Publish
         run: |
           npm install
-          node cli.mjs --publish --public
+          node cli.mjs publish
         env:
           version: ${{ steps.bump_version.outputs.new_tag }}
           NPM_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN }}

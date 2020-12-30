@@ -1,5 +1,5 @@
 import path from "path";
-import {stat, readdir} from "./file-system.mjs";
+import {stat, readdir} from "../utils/file-system.mjs";
 
 export default (root, splat) => {
 

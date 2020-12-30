@@ -1,45 +1,25 @@
 #!/usr/bin/env node
-import {exec} from "child_process";
-import {isPrivate, buildOptions} from "./package-json.mjs";
-import build from "./build.mjs";
-import bumpVersion from "./bump-version.mjs";
+import installDependencies from "./utils/install-dependencies.mjs";
+import build from "./build-package/index.mjs";
+import publish from "./publish/index.mjs";
+import runDevServers from "./run-dev/index.mjs";
 
 const invoke = async () => {
     const root = process.cwd();
-    await buildSource(root);
-    if (shouldPublish()) await publish(root);
+    await installDependencies();
+    if (shouldRun())
+        return await runDevServers(root);
+    await build(root);
+    if (shouldPublish())
+        await publish(root, process.env.version);
+};
+
+const shouldRun = () => {
+    return process.argv.includes("dev");
 };
 
 const shouldPublish = () => {
-    return process.argv.includes("--publish");
-};
-
-const buildSource = (root) => logProgress(async () => {
-    console.log("\n\x1b[96mInstalling packages...\x1b[0m");
-    await runCommand("npm install");
-    console.log("\n\x1b[96mTranspiling source...\x1b[0m");
-    await build(root, buildOptions);
-});
-
-const publish = async (root) => {
-    const version = (process.env.version || "v0.1.0").slice(1);
-    await bumpVersion(root, version, buildOptions);
-    const publicFlags = isPrivate ? "" : " --access public";
-    await runCommand(`npm publish ./${buildOptions.outDir}${publicFlags}`);
-};
-
-const runCommand = (command) => new Promise((resolve) => {
-    const child = exec(command, {env: process.env});
-    child.stderr.on("data", data => console.error(data.toString()));
-    child.on("close", resolve);
-});
-
-const logProgress = async (invokable) => {
-    const start = Date.now();
-    console.log("\n\x1b[35mBuilding...\x1b[0m");
-    await invokable();
-    const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-    console.log(`\x1b[32mBuild completed in \x1b[92m${elapsed}\x1b[32ms\x1b[0m`);
+    return process.argv.includes("publish");
 };
 
 await invoke();

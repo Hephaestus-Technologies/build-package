@@ -1,4 +1,4 @@
-import * as fs from "./file-system.mjs";
+import * as fs from "../utils/file-system.mjs";
 import * as path from "path";
 
 /**
@@ -12,7 +12,6 @@ export default async (root, version, {outDir}) => {
 
     const defaults = {
         description: "",
-        repository: "",
         license: "MIT"
     };
 
