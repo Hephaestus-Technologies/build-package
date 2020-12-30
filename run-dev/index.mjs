@@ -20,7 +20,6 @@ export default async (root) => {
         await buildHtml();
         await buildSnowpackConfig();
         await runSnowpack();
-        await cleanupBin();
     };
 
     const installPlugins = async () => {
@@ -39,6 +38,7 @@ export default async (root) => {
         const directory = path.join(root, "bin");
         if (!fs.exists(directory))
             await fs.mkdir(directory);
+        process.on("SIGINT", cleanupBin);
     };
 
     const  buildHtml = () => {
