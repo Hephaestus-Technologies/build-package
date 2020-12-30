@@ -15,16 +15,21 @@ import {fileURLToPath} from "url";
 export default async (root) => {
 
     const invoke = async () => {
-        await installPlugins();
-        await prepareBin();
-        await buildHtml();
-        await buildSnowpackConfig();
-        await runSnowpack();
+        await logProgress("Installing dev server", async () => {
+            await installPlugins();
+        });
+        await logProgress("Starting servers", async () => {
+            await prepareBin();
+            await buildHtml();
+            await buildSnowpackConfig();
+            await runSnowpack();
+        });
     };
 
     const installPlugins = async () => {
-        const plugins = await readPlugins();
-        await runCommand(`npm install snowpack ${plugins.join(" ")} --no-save --loglevel error`)
+        const modules = ["snowpack", ...await readPlugins()];
+        const flags = ["--no-package-lock", "--no-save", "--loglevel error"];
+        await runCommand(`npm install ${modules.join(" ")} ${flags.join(" ")}`);
     };
 
     const readPlugins = async () => {
@@ -42,13 +47,13 @@ export default async (root) => {
     };
 
     const  buildHtml = () => {
-        const html = htmlTemplate(clientOptions);
+        const html = htmlTemplate(buildOptions.client);
         const htmlFilename = path.join(root, "bin", "index.html");
         return fs.writeFile(htmlFilename, html);
-    }
+    };
 
     const buildSnowpackConfig = () => {
-        const config = configTemplate(root, clientOptions.rootDir);
+        const config = configTemplate(root, buildOptions.client.rootDir);
         return fs.writeFile(configFilename(), config);
     };
 
@@ -60,17 +65,11 @@ export default async (root) => {
         return path.join(root, "bin", "snowpack.config.js");
     };
 
-    const clientOptions = {
-        rootDir: "/",
-        app: "app.tsx",
-        ...buildOptions.client
-    };
-
     const cleanupBin = () => {
         const directory = path.join(root, "bin");
         return fs.rm(directory, {force: true, recursive: true});
     };
 
-    return logProgress("Starting server", invoke);
+    return invoke();
 
 };
