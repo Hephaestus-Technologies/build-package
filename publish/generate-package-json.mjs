@@ -19,7 +19,7 @@ export default async (root, version, {outDir}) => {
     const outputPath = path.join(root, path.join("./", outDir, "package.json"));
 
     const raw = await fs.readFile(templatePath);
-    const {name, buildOptions, plugins, scripts, ...json} = JSON.parse(raw.toString());
+    const {name, buildOptions, scripts, ...json} = JSON.parse(raw.toString());
     const result = JSON.stringify({name, version, ...defaults, ...json}, null, 2);
 
     await fs.writeFile(outputPath, result);
