@@ -7,14 +7,14 @@ import runDevServers from "./run-dev/index.mjs";
 const invoke = async () => {
     const root = process.cwd();
     await installDependencies();
-    if (shouldRun())
-        return await runDevServers(root);
     await build(root);
+    if (shouldRunDev())
+        await runDevServers(root);
     if (shouldPublish())
         await publish(root, process.env.version);
 };
 
-const shouldRun = () => {
+const shouldRunDev = () => {
     return process.argv.includes("dev");
 };
 

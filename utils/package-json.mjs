@@ -5,7 +5,7 @@ const root = process.cwd();
 
 /**
  * @typedef {object} PackageJson
- * @property {BuildOptions} buildOptions
+ * @property {ThisBuildOptions} buildOptions
  * @property {boolean} private
  */
 
@@ -19,11 +19,12 @@ const json = await readJson();
 
 const isPrivate = json.private != null ? json.private : true;
 
+/** @type ThisBuildOptions */
 const buildOptions = {
     outDir: "build",
     inputs: [],
-    client: {},
-    api: {},
+    client: null,
+    api: null,
     shared: [],
     ...json.buildOptions
 };

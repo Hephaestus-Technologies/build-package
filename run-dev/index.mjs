@@ -15,19 +15,19 @@ import {fileURLToPath} from "url";
 export default async (root) => {
 
     const invoke = async () => {
-        await logProgress("Installing dev server", async () => {
+        await logProgress("Installing dev plugins", async () => {
             await installPlugins();
         });
-        await logProgress("Starting servers", async () => {
-            await prepareBin();
-            await buildHtml();
-            await buildSnowpackConfig();
-            await runSnowpack();
+        await logProgress("Starting servers", () => {
+            return Promise.all([
+                runClientServer(),
+                runApiServer()
+            ]);
         });
     };
 
     const installPlugins = async () => {
-        const modules = ["snowpack", ...await readPlugins()];
+        const modules = await readPlugins();
         const flags = ["--no-package-lock", "--no-save", "--loglevel error"];
         await runCommand(`npm install ${modules.join(" ")} ${flags.join(" ")}`);
     };
@@ -37,6 +37,14 @@ export default async (root) => {
         const jsonPath = path.join(dirname, "../package.json");
         const raw = await readFile(jsonPath);
         return JSON.parse(raw).plugins;
+    };
+
+    const runClientServer = async () => {
+        if (!buildOptions.client) return;
+        await prepareBin();
+        await buildHtml();
+        await buildSnowpackConfig();
+        await runSnowpack();
     };
 
     const prepareBin = async () => {
@@ -52,8 +60,8 @@ export default async (root) => {
         return fs.writeFile(htmlFilename, html);
     };
 
-    const buildSnowpackConfig = () => {
-        const config = configTemplate(root, buildOptions);
+    const buildSnowpackConfig = async () => {
+        const config = configTemplate(root, buildOptions, await readPlugins());
         return fs.writeFile(configFilename(), config);
     };
 
@@ -68,6 +76,18 @@ export default async (root) => {
     const cleanupBin = () => {
         const directory = path.join(root, "bin");
         return fs.rm(directory, {force: true, recursive: true});
+    };
+
+    const runApiServer = () => {
+        if (!buildOptions.api) return;
+        const {api: apiOptions, outDir} = buildOptions;
+        const {dir, name} = path.parse(apiOptions.rootApi);
+        const scriptPath = [
+            ...outDir.split("/"),
+            ...apiOptions.rootDir.split("/"),
+            ...dir.split("/")
+        ].filter(Boolean).join("/");
+        return runCommand(`node ${scriptPath}/${name}.js`);
     };
 
     return invoke();

@@ -1,34 +1,35 @@
+import path from "path";
+
 /**
  * @param {string} root
- * @param {BuildOptions} buildOptions
+ * @param {ThisBuildOptions} buildOptions
+ * @param {string[]} plugins
  * @returns {string}
  */
-export default (root, buildOptions) => {
+export default (root, buildOptions, plugins) => {
 
     const invoke = () => ({
         buildOptions: {
             "clean": true,
-            "sourceMaps": true
+            "sourcemap": true
         },
-        mount: mountedDirectories(),
-        plugins: [
-            "@snowpack/plugin-sass",
-            "@snowpack/plugin-react-refresh"
-        ]
+        mount: {
+            [directory(buildOptions.client.rootDir)]: "/",
+            ...buildOptions.shared.reduce((curr, item) => ({
+                ...curr,
+                [directory(item)]: `/${item}`
+            }), {}),
+            [directory("bin")]: "/"
+        },
+        plugins
     });
 
-    const mountedDirectories = () => ({
-        [dir(buildOptions.client.rootDir)]: "/",
-        ...buildOptions.shared.reduce(sharedDir, {}),
-        [dir("bin")]: "/"
-    });
-
-    const sharedDir = (curr, item) => ({
-        ...curr,
-        [dir(item)]: `/${item}`
-    });
-
-    const dir = (item) => `${root.replace(/\\/g, '/')}/${item}`;
+    const directory = (dirname) => {
+        return path
+            .join(root, dirname)
+            .split("\\")
+            .join("/");
+    }
 
     return JSON.stringify(invoke(), null, 4) + "\n";
 

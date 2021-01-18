@@ -23,7 +23,7 @@ export default (filenames, outDir) => {
     const tsOptions = {
         jsx: ts.JsxEmit.React,
         target: ts.ScriptTarget.ESNext,
-        module: ts.ModuleKind.ESNext,
+        module: ts.ModuleKind.CommonJS,
         moduleResolution: ts.ModuleResolutionKind.NodeJs,
         declaration: true,
         alwaysStrict: true,

@@ -11,7 +11,7 @@
  */
 
 /**
- * @typedef {object} BuildOptions
+ * @typedef {object} ThisBuildOptions
  * @property {string[]} [inputs]
  * @property {string} [outDir]
  * @property {ClientOptions} [client]
